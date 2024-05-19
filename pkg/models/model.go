@@ -15,8 +15,8 @@ type Entry struct {
 }
 
 func init() {
-	config.Connect()
-	db_sql = config.GetDB()
+	config.ConnectSQL()
+	db_sql = config.GetSQL()
 }
 
 func (E *Entry) AddToDatabase() {
