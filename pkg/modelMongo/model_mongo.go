@@ -6,6 +6,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"log"
 )
 
 type BsonEntry struct {
@@ -44,4 +45,45 @@ func ReadMongo(db, col string, query, field interface{}) []BsonEntry {
 		output = append(output, BsonEntry{Date: a, Day: b, Tasks: c})
 	}
 	return output
+}
+
+func (entry BsonEntry) WriteMongo(db, col string) {
+
+	new_entry := bson.D{
+		{"date", entry.Date},
+		{"day", entry.Day},
+		{"tasks", entry.Tasks},
+	}
+	collection := Client.Database(db).Collection(col)
+	_, err := collection.InsertOne(Ctx, new_entry)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func (entry BsonEntry) DeleteMongo(db, col string) {
+
+	new_entry := bson.D{
+		{"date", entry.Date},
+	}
+	collection := Client.Database(db).Collection(col)
+	_, err := collection.DeleteOne(Ctx, new_entry)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func (entry BsonEntry) UpdateMongo(db, col string) {
+
+	update := bson.D{
+		{"$set", bson.D{{"day", entry.Day}, {"tasks", entry.Tasks}}},
+	}
+	filter := bson.D{{"date", entry.Date}}
+
+	collection := Client.Database(db).Collection(col)
+
+	_, err := collection.UpdateOne(Ctx, filter, update)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

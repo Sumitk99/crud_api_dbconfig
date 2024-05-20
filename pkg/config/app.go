@@ -8,13 +8,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
-	"gopkg.in/mgo.v2"
 	"log"
 	"time"
 )
 
 var db_sql *sql.DB
-var MongoSession *mgo.Session
 
 func GetConfig() bool {
 	return false
