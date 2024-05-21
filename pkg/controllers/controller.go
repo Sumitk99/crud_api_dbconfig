@@ -65,3 +65,12 @@ func Delete_entry(res http.ResponseWriter, req *http.Request) {
 		json.NewEncoder(res).Encode(modelMongo.ReadMongo("MongoNew", "entries", r, r))
 	}
 }
+
+func Join_Query(res http.ResponseWriter, req *http.Request) {
+	res.Header().Set("Content-Type", "application/json")
+	if config.GetConfig() {
+		var v models.TableList
+		json.NewDecoder(req.Body).Decode(&v)
+		json.NewEncoder(res).Encode(v.JoinTable())
+	}
+}

@@ -10,4 +10,5 @@ var Operation_routes = func(router *mux.Router) {
 	router.HandleFunc("/", controllers.Add_entry).Methods("POST")
 	router.HandleFunc("/", controllers.Update_entry).Methods("PUT")
 	router.HandleFunc("/", controllers.Delete_entry).Methods("DELETE")
+	router.HandleFunc("/", controllers.Join_Query).Methods("PATCH")
 }

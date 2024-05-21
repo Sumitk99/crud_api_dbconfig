@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/Sumitk99/crud_api_dbconfig.git/pkg/config"
+	"log"
 )
 
 var db_sql *sql.DB
@@ -64,4 +65,70 @@ func (e *Entry) UpdateDatabase() {
 		panic(err.Error())
 	}
 	temp.Exec(e.Tasks, e.Day, e.Date)
+}
+
+type Table struct {
+	TableName  string `json:"table_name"`
+	LocalKey   string `json:"local_key"`
+	ForeignKey string `json:"foreign_key"`
+}
+type TableList struct {
+	RootTable  string  `json:"root_table"`
+	TableArray []Table `json:"table_array"`
+}
+type Pair struct {
+	Field string `json:"field"`
+	Value string `json:"value"`
+}
+
+func (v *TableList) CreateQuery() string {
+	query := "SELECT * FROM " + v.RootTable
+	leftTable := v.RootTable
+	foreignKey := leftTable + "." + v.TableArray[0].ForeignKey
+
+	for i := 0; i < len(v.TableArray); i++ {
+		if i > 0 {
+			leftTable = v.TableArray[i-1].TableName
+			foreignKey = leftTable + "." + v.TableArray[i-1].ForeignKey
+		}
+		rightTable := v.TableArray[i].TableName
+		localKey := rightTable + "." + v.TableArray[i].LocalKey
+
+		query = query + " INNER JOIN " + rightTable + " ON " + localKey + " = " + foreignKey
+		fmt.Println(query)
+	}
+	return query
+}
+
+func (v *TableList) JoinTable() [][]Pair {
+
+	query := v.CreateQuery()
+	rows, err := db_sql.Query(query)
+	if err != nil {
+		log.Fatal(err)
+	}
+	columns, err := rows.Columns()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var results [][]Pair
+	for rows.Next() {
+		rowValues := make([]string, len(columns))
+		valuePtrs := make([]interface{}, len(columns))
+		for i := range rowValues {
+			valuePtrs[i] = &rowValues[i]
+		}
+		err = rows.Scan(valuePtrs...)
+		if err != nil {
+			log.Fatal(err)
+		}
+		var rowData []Pair
+		for i, col := range columns {
+			ele := rowValues[i]
+			rowData = append(rowData, Pair{Field: col, Value: ele})
+		}
+		results = append(results, rowData)
+	}
+	return results
 }
